@@ -1,25 +1,21 @@
 import json
 import urllib.parse
-import requests
 import scrapy
-from scrapy.crawler import CrawlerProcess
-import imdb
 import os
-import time
 from rich.traceback import install
-from rich import print
 from rich.console import Console
-from rich import inspect
 
+#init rich
+install()
 console = Console()
-install(show_locals=True)
 
-# # #get torrent data
-t0 = time.time()
+#get torrent data
 os.path.exists("torrent_items.jsonl") and os.remove("torrent_items.jsonl")
 
-# # search_query = input('What would you like to search for?\n')
-search_query = 'euphoria'
+console.print(":popcorn:")
+search_query = input('')
+# search_query = 'euphoria s02e04'
+# search_query = 'harry potter'
 
 class Spider_1337x(scrapy.Spider):
     # Your spider definition
@@ -54,61 +50,12 @@ class Spider_thepiratebay(scrapy.Spider):
 
     def parse(self, response):
         data = json.loads(response.text)
-        for i in range(len(data)):
-            current_item = data[i]
-            current_item["website"] = "thepiratebay.org"
-            current_item["seeds"] = current_item.pop("seeders", 0)
-            current_item["torrent_page_link"] = f'https://thepiratebay.org/description.php?id={current_item["id"]}]'
-            current_item["magnet_url"] = f"magnet:?xt=urn:btih:{current_item['info_hash']}&dn={urllib.parse.quote(current_item['name'])}"
-            yield current_item
+        if data[0]["name"] != "No results returned":
+            for i in range(len(data)):
+                current_item = data[i]
+                current_item["website"] = "thepiratebay.org"
+                current_item["seeds"] = current_item.pop("seeders", 0)
 
-
-process = CrawlerProcess(settings={
-    "FEEDS": {
-        "torrent_items.jsonl": {"format": "jsonlines"},
-    },
-})
-
-process.crawl(Spider_thepiratebay)
-process.crawl(Spider_1337x)
-
-
-process.start() # the script will block here until the crawling is finished
-
-
-#get imdb id and query EZTV
-ia = imdb.Cinemagoer()
-search_results = ia.search_movie(search_query)
-#display the results to the user so that they can choose the right one...
-imdb_id = search_results[0].movieID
-print(imdb_id)
-request = requests.get(f'https://eztv.re/api/get-torrents?imdb_id={imdb_id}')
-
-with open('torrent_items.jsonl', 'a') as file:
-    torrent_data = request.json()
-    for torrent in torrent_data["torrents"]:
-        torrent["website"] = "EZTV"
-        torrent["name"] = torrent.pop("filename", '')
-        json.dump(torrent, file)
-        file.write('\n')
-
-
-##sort torrents
-with open('torrent_items.jsonl') as f:
-    data = [json.loads(line) for line in f]
-
-sorted_torrents = sorted(data, key=lambda torrent: int(torrent["seeds"]), reverse=True)
-
-for name in sorted_torrents[:10]:
-    print(f"[yellow]{name['seeds']}[/yellow]", f"[green]{name['website']}[/green]", f"[blue]{name['name']}[/blue]")
-
-#display torrents to user
-
-
-
-
-#activate torrent through transmission client
-
-t1 = time.time()
-
-print(t1 - t0)
+                current_item["torrent_page_link"] = f'https://thepiratebay.org/description.php?id={current_item["id"]}]'
+                current_item["magnet_url"] = f"magnet:?xt=urn:btih:{current_item['info_hash']}&dn={urllib.parse.quote(current_item['name'])}"
+                yield current_item

@@ -1,3 +1,8 @@
 env/
 torrent_items.json
 torrent_items.jsonl
+code_runner.scpt
+*.pyc
+.scpt
+.jsonl
+.DS_Store
