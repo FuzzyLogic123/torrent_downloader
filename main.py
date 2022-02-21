@@ -7,6 +7,7 @@ import math
 import os
 from transmission_rpc import Client
 from time import sleep
+import psutil
 
 def main():
     process = CrawlerProcess(settings={
@@ -60,7 +61,6 @@ def main():
 
         console.print(table)
 
-    # os.system('cls' if os.name == 'nt' else 'clear')
 
 
     torrent_count = 10
@@ -82,12 +82,15 @@ def main():
 
     #activate torrent through transmission client
 
-    #set this to false if you want to launch tranmsission application
+    # for process in psutil.process_iter():
+    #     print(process.name)
+    #check if transmission-daemon is already running
     headless_mode = True
-    if headless_mode:
+    if "Transmission" in (p.name() for p in psutil.process_iter()):
+        headless_mode = False
+    elif "transmission-daemon" not in (p.name() for p in psutil.process_iter()):
         os.system('transmission-daemon')
-    else:
-        os.system("open /Applications/Transmission.app")
+
 
     torrent_url = sorted_torrents[ user_index_choice - 1 ]["magnet_url"]
 
@@ -103,7 +106,7 @@ def main():
     c.add_torrent(torrent_url, download_dir='/Users/patrickedwards/Desktop/movies and tv.nosync')
 
     console.print("\n:thumbs_up: [sea_green2]Download Started![/]\n")
-    headless_mode and console.print("View Status at [link]http://localhost:9091/transmission/web/\n")
+    if headless_mode: console.print("View Status at [link]http://localhost:9091/transmission/web/\n")
 
 if __name__ == "__main__":
     main()
