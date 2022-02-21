@@ -100,7 +100,7 @@ def main():
             except:
                 sleep(0.1)
 
-    c.add_torrent(torrent_url, download_dir='/Users/patrickedwards/Desktop/movies and tv.nosync ')
+    c.add_torrent(torrent_url, download_dir='/Users/patrickedwards/Desktop/movies and tv.nosync')
 
     console.print("\n:thumbs_up: [sea_green2]Download Started![/]\n")
     headless_mode and console.print("View Status at [link]http://localhost:9091/transmission/web/\n")
