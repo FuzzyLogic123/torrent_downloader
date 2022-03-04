@@ -5,13 +5,40 @@ from time import sleep
 
 import psutil
 from rich import box
-from rich.prompt import Confirm
 from rich.table import Table
 from scrapy.crawler import CrawlerProcess
 from transmission_rpc import Client
 
 from web_scraper import Spider_1337x, Spider_thepiratebay, console
 
+
+
+def convert_size(size_bytes):
+    if size_bytes == 0:
+        return "0B"
+    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+    i = int(math.floor(math.log(size_bytes, 1024)))
+    p = math.pow(1024, i)
+    s = round(size_bytes / p, 2)
+    return "%s %s" % (s, size_name[i])
+
+def print_table(sorted_torrents, result_count=20):
+    table = Table(title="Available Torrents :popcorn: :movie_camera:",
+                    box=box.HEAVY_EDGE, leading=True)
+
+    table.add_column("#", style="yellow bold", no_wrap=True)
+    table.add_column("Title", style="cyan")
+    table.add_column("Website", style="orange1", no_wrap=True)
+    table.add_column("Seeders", style="green", no_wrap=True)
+    table.add_column("Size", style="red bold", no_wrap=True)
+
+    for i, torrent in enumerate(sorted_torrents[:result_count]):
+        torrent_size = convert_size(
+            int(torrent["size"])) if torrent["website"] != "1337x.to" else torrent["size"]
+        table.add_row(str(
+            i + 1), torrent["name"], torrent["website"], str(torrent["seeds"]), torrent_size)
+
+    console.print(table)
 
 def main():
     process = CrawlerProcess(settings={
@@ -41,32 +68,6 @@ def main():
 
     # display torrents to user
 
-    def convert_size(size_bytes):
-        if size_bytes == 0:
-            return "0B"
-        size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
-        i = int(math.floor(math.log(size_bytes, 1024)))
-        p = math.pow(1024, i)
-        s = round(size_bytes / p, 2)
-        return "%s %s" % (s, size_name[i])
-
-    def print_table(sorted_torrents, result_count=20):
-        table = Table(title="Available Torrents :popcorn: :movie_camera:",
-                      box=box.HEAVY_EDGE, leading=True)
-
-        table.add_column("#", style="yellow bold", no_wrap=True)
-        table.add_column("Title", style="cyan")
-        table.add_column("Website", style="orange1", no_wrap=True)
-        table.add_column("Seeders", style="green", no_wrap=True)
-        table.add_column("Size", style="red bold", no_wrap=True)
-
-        for i, torrent in enumerate(sorted_torrents[:result_count]):
-            torrent_size = convert_size(
-                int(torrent["size"])) if torrent["website"] != "1337x.to" else torrent["size"]
-            table.add_row(str(
-                i + 1), torrent["name"], torrent["website"], str(torrent["seeds"]), torrent_size)
-
-        console.print(table)
 
     torrent_count = 10
     torrent_count_delta = torrent_count
@@ -95,15 +96,6 @@ def main():
     if "transmission-daemon" not in (p.name() for p in psutil.process_iter()):
         os.system('transmission-daemon')
 
-    # warn the user they are not connected to vpn
-    if "NordVPN" not in (p.name() for p in psutil.process_iter()):
-        console.print("[yellow]:warning: You are not connected to a VPN")
-        use_vpn = Confirm.ask("Would you like to open NordVPN?")
-        if use_vpn:
-            os.system("open /Applications/NordVPN.app")
-            start_torrent = input('Press enter to start')
-            while start_torrent != '':
-                start_torrent = input()
     torrent_url = sorted_torrents[user_index_choice - 1]["magnet_url"]
 
     with console.status("[yellow blink]Connecting client...[/]", spinner="aesthetic"):

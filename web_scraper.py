@@ -1,17 +1,34 @@
 import json
-import urllib.parse
-import scrapy
 import os
-from rich.traceback import install
+import urllib.parse
+import psutil
+
+import scrapy
 from rich.console import Console
+from rich.prompt import Confirm
+from rich.traceback import install
 
 #init rich
 install()
 console = Console()
 
+
+def check_for_vpn():
+    # warn the user they are not connected to vpn
+    if "NordVPN" not in (p.name() for p in psutil.process_iter()):
+        console.print("[yellow]:warning: You are not connected to a VPN")
+        use_vpn = Confirm.ask("Would you like to open NordVPN?")
+        if use_vpn:
+            os.system("open /Applications/NordVPN.app")
+            start_torrent = input('')
+            while start_torrent != '':
+                start_torrent = input()
+
+
 #get torrent data
 os.path.exists("torrent_items.jsonl") and os.remove("torrent_items.jsonl")
 
+check_for_vpn()
 console.print(":popcorn:")
 search_query = input('')
 # search_query = 'euphoria s02e04'
