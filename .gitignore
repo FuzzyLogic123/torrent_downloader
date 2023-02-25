@@ -6,3 +6,4 @@ code_runner.scpt
 .scpt
 .jsonl
 .DS_Store
+.env

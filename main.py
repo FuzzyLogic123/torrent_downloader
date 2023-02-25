@@ -12,7 +12,6 @@ from transmission_rpc import Client
 from web_scraper import Spider_1337x, Spider_thepiratebay, console
 
 
-
 def convert_size(size_bytes):
     if size_bytes == 0:
         return "0B"
@@ -88,11 +87,7 @@ def main():
             except:
                 console.print(":warning:[red]Please enter an integer[/]")
 
-    # activate torrent through transmission client
-
-    # for process in psutil.process_iter():
-    #     print(process.name)
-    # check if transmission-daemon is already running
+    # check if transmission-daemon is already running and activate torrent through transmission client
     if "transmission-daemon" not in (p.name() for p in psutil.process_iter()):
         os.system('transmission-daemon')
 
@@ -102,18 +97,15 @@ def main():
         client_launced = False
         while client_launced == False:
             try:
-                c = Client(host="localhost", username="admin",
-                           password="password", port=9091)
+                c = Client(host="localhost", port=9091)
                 client_launced = True
             except:
                 sleep(0.1)
 
-    c.add_torrent(
-        torrent_url, download_dir='/Users/patrickedwards/Desktop/movies and tv.nosync')
+    c.add_torrent(torrent_url)
 
     console.print("\n:thumbs_up: [sea_green2]Download Started![/]\n")
-    console.print(
-        "View Status at [link]http://localhost:9091/transmission/web/\n")
+    console.print("View Status at [link]http://localhost:9091/transmission/web/\n")
 
 
 if __name__ == "__main__":
