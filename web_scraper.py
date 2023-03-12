@@ -28,7 +28,7 @@ def check_for_vpn():
 #get torrent data
 os.path.exists("torrent_items.jsonl") and os.remove("torrent_items.jsonl")
 
-check_for_vpn()
+# check_for_vpn()
 console.print(":popcorn:")
 search_query = input('')
 # search_query = 'euphoria s02e04'
